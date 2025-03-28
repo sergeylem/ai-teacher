@@ -1,0 +1,24 @@
+{
+  "name": "ai-teacher-backend",
+  "version": "1.0.0",
+  "description": "NestJS backend for AI Teacher",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "openai": "^4.0.0",
+    "dotenv": "^16.0.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "typescript": "^5.0.0"
+  }
+}
