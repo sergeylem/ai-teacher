@@ -27,7 +27,7 @@ function App() {
       setOutputText(data.answer);
     } catch (err) {
       console.error(err);
-      setOutputText("Ошибка запроса к AI");
+      setOutputText("Error request to AI");
     }
   };
 
@@ -48,17 +48,17 @@ function App() {
         onChange={(e) => setInputText(e.target.value)}
         rows={4}
         style={{ width: "100%", marginBottom: 10 }}
-        placeholder="Напиши или нажми на микрофон 🎙️"
+        placeholder="Type your phrase or tap the microphone 🎙️"
       />
       <div style={{ marginBottom: 10 }}>
-        <button onClick={handleVoiceInput}>🎙️ Говори</button>
-        <button onClick={handleSubmit} style={{ marginLeft: 10 }}>Отправить</button>
+        <button onClick={handleVoiceInput}>🎙️ Speak</button>
+        <button onClick={handleSubmit} style={{ marginLeft: 10 }}>Send</button>
       </div>
       {outputText && (
         <div style={{ marginTop: 20 }}>
           <strong>Ответ:</strong>
           <p>{outputText}</p>
-          <button onClick={handleSpeak} disabled={isSpeaking}>🔊 Прослушать</button>
+          <button onClick={handleSpeak} disabled={isSpeaking}>🔊 Listen</button>
         </div>
       )}
     </div>

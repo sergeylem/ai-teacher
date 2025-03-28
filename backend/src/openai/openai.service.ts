@@ -13,8 +13,7 @@ export class OpenaiService {
     const response = await this.openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
-        // { role: 'system', content: 'Ты переводчик с русского на английский. Кратко объясни и переведи.' },
-        { role: 'system', content: 'Переводи только c русского на английский. Без пояснений, без примеров.' },
+        { role: 'system', content: 'You are a translator. Translate only from Russian to English. Do not provide explanations or examples. Only return the translation.' },
         { role: 'user', content: question },
       ],
     });
