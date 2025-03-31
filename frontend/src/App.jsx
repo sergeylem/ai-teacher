@@ -4,13 +4,15 @@ function App() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [mode, setMode] = useState("translate"); // "translate", "teacher-en"
   const recognitionRef = useRef(null);
+
 
   const handleVoiceInput = () => {
     const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = "ru-RU";
     recognition.interimResults = false;
     recognition.continuous = true;
+    recognition.lang = mode === "teacher-en" ? "en-US" : "ru-RU";
 
     let finalTranscript = "";
     let silenceTimeout;
@@ -27,7 +29,7 @@ function App() {
       clearTimeout(silenceTimeout);
       silenceTimeout = setTimeout(() => {
         recognition.stop();
-      }, 3000); // end after 3 seconds of silence
+      }, mode === "teacher-en" ? 6000 : 3000); // silenceTimeout depends on mode
     };
 
     recognition.onend = () => {
@@ -43,7 +45,7 @@ function App() {
       const res = await fetch("http://localhost:3001/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: inputText }),
+        body: JSON.stringify({ question: inputText, mode }),
       });
       const data = await res.json();
       setOutputText(data.answer.trim());
@@ -74,9 +76,18 @@ function App() {
       fontFamily: "sans-serif", 
       maxWidth: "37.5rem", // 600, 
       margin: "0 auto",
-      fontSize: "1.125rem" // 18px 
+      fontSize: "1.125rem", // 18px
+      position: "relative" // so that select can be positioned
       }}>
-      <strong style={{ display: "block", marginTop: "1rem", marginBottom: "1rem"  }}>Text to translate</strong>
+    {/* Режим выбора — ВЕРХНИЙ ПРАВЫЙ УГОЛ */}
+      <div style={{ position: "absolute", top: 20, right: 20 }}>
+       <select value={mode} onChange={(e) => setMode(e.target.value)}>
+          <option value="translate">Translate RU → EN</option>
+          <option value="teacher-en">AI teacher — only English</option>
+          <option value="teacher-en-ru" disabled>AI teacher — EN + RU</option>
+        </select>
+      </div>        
+      <strong style={{ display: "block", marginTop: "1rem", marginBottom: "1rem"  }}>Text to translate/Talk to AI</strong>
       <textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
