@@ -5,39 +5,52 @@ function App() {
   const [outputText, setOutputText] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [mode, setMode] = useState("translate"); // "translate", "teacher-en"
-  const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
+  const handleVoiceInput = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    audioChunksRef.current = [];
 
-  const handleVoiceInput = () => {
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.interimResults = false;
-    recognition.continuous = true;
-    recognition.lang = mode === "teacher-en" ? "en-US" : "ru-RU";
-
-    let finalTranscript = "";
-    let silenceTimeout;
-
-    recognition.onresult = (event) => {
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + " ";
-        }
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        audioChunksRef.current.push(e.data);
       }
-      setInputText(finalTranscript.trim());
-
-      // reset the timer if the user continues talking
-      clearTimeout(silenceTimeout);
-      silenceTimeout = setTimeout(() => {
-        recognition.stop();
-      }, mode === "teacher-en" ? 6000 : 3000); // silenceTimeout depends on mode
     };
 
-    recognition.onend = () => {
-      console.log("Recognition completed (by silence or manually)");
+    mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+      formData.append("mode", mode);
+
+      try {
+        const res = await fetch("http://localhost:3001/api/whisper", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        setInputText(data.transcript);
+      } catch (err) {
+        console.error(err);
+        setInputText("Speech recognition error");
+      }
     };
 
-    recognitionRef.current = recognition;
-    recognition.start();
+    mediaRecorderRef.current = mediaRecorder;
+    mediaRecorder.start();
+
+    // Auto stop recording in 6 sec
+    setTimeout(() => {
+      mediaRecorder.stop();
+    }, 6000);
+  };
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
   };
 
   const handleSubmit = async () => {
@@ -64,44 +77,36 @@ function App() {
     window.speechSynthesis.speak(utterance);
   };
 
-  const handleStopMic = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-  };
-
   return (
-    <div style={{ 
-      padding: "1.25rem", 
-      fontFamily: "sans-serif", 
-      maxWidth: "37.5rem", // 600, 
+    <div style={{
+      padding: "1.25rem",
+      fontFamily: "sans-serif",
+      maxWidth: "37.5rem",
       margin: "0 auto",
       fontSize: "1.125rem", // 18px
       position: "relative" // so that select can be positioned
-      }}>
-    {/* Режим выбора — ВЕРХНИЙ ПРАВЫЙ УГОЛ */}
+    }}>
+    {/* Select mode — location rigth upper coner*/}
       <div style={{ position: "absolute", top: 20, right: 20 }}>
-       <select value={mode} onChange={(e) => setMode(e.target.value)}>
+        <select value={mode} onChange={(e) => setMode(e.target.value)}>
           <option value="translate">Translate RU → EN</option>
           <option value="teacher-en">AI teacher — only English</option>
           <option value="teacher-en-ru" disabled>AI teacher — EN + RU</option>
         </select>
-      </div>        
-      <strong style={{ display: "block", marginTop: "1rem", marginBottom: "1rem"  }}>Text to translate/Talk to AI</strong>
+      </div>
+      <strong style={{ display: "block", marginTop: "1rem", marginBottom: "1rem" }}>
+        Text to translate / Talk to AI
+      </strong>
       <textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
         rows={4}
-        style={{ 
-          width: "100%", 
-          marginBottom: "0.625rem", // 10,
-          fontSize: "1.125rem"
-        }}
+        style={{ width: "100%", marginBottom: "0.625rem", fontSize: "1.125rem" }}
         placeholder="Type your phrase or tap the microphone 🎙️"
       />
       <div style={{ marginBottom: 10 }}>
-        <button onClick={handleVoiceInput}>🎙️ Speak</button>
-        <button onClick={handleStopMic} style={{ marginLeft: 10 }}>⏹️ Stop</button>
+        <button onClick={handleVoiceInput}>🎙️ Record</button>
+        <button onClick={handleStopRecording} style={{ marginLeft: 10 }}>⏹️ Stop</button>
         <button onClick={handleSubmit} style={{ marginLeft: 10 }}>Send</button>
       </div>
       {outputText && (
