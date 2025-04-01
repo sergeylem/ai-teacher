@@ -4,10 +4,29 @@ function App() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [mode, setMode] = useState("translate"); // "translate", "teacher-en"
+  const [mode, setMode] = useState("teacher-en"); // "translate", "teacher-en"
+  const [explanationVisible, setExplanationVisible] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  const parseOutput = (text) => {
+    const lines = text.split("\n").map(line => line.trim()).filter(Boolean);
+  
+    const mistake = lines.find(line => line.startsWith("❌")) || "";
+    const correct = lines.find(line => line.startsWith("✅")) || "";
+    const explanationRaw = lines.find(line => line.startsWith("🧠")) || "";
+  
+    const lower = explanationRaw.toLowerCase();
+    const explanation =
+      !explanationRaw ||
+      lower.includes("no mistake") ||
+      lower.startsWith("✅ correct")
+        ? null
+        : explanationRaw;
+  
+    return { mistake, correct, explanation };
+  };
+  
   const handleVoiceInput = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
@@ -43,6 +62,22 @@ function App() {
       }
     };
 
+    const handleSubmitFromTranscript = async (transcript) => {
+      try {
+        setExplanationVisible(false);
+        const res = await fetch("http://localhost:3001/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: transcript, mode }),
+        });
+        const data = await res.json();
+        setOutputText(data.answer.trim());
+      } catch (err) {
+        console.error(err);
+        setOutputText("Error request to AI");
+      }
+    };
+    
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         audioChunksRef.current.push(e.data);
@@ -61,7 +96,9 @@ function App() {
           body: formData,
         });
         const data = await res.json();
+        setExplanationVisible(false); // reset before new speech recognition
         setInputText(data.transcript);
+        handleSubmitFromTranscript(data.transcript);
       } catch (err) {
         console.error(err);
         setInputText("Speech recognition error");
@@ -75,7 +112,7 @@ function App() {
         audioContext.close();
       }
     };
-  
+
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.start();
     requestAnimationFrame(detectSilence); // 🧠 start silence monitoring
@@ -95,6 +132,7 @@ function App() {
         body: JSON.stringify({ question: inputText, mode }),
       });
       const data = await res.json();
+      setExplanationVisible(false); // reset before new response
       setOutputText(data.answer.trim());
     } catch (err) {
       console.error(err);
@@ -104,13 +142,17 @@ function App() {
 
   const handleSpeak = () => {
     if (!outputText) return;
-    const utterance = new SpeechSynthesisUtterance(outputText);
+    const { correct, explanation } = parseOutput(outputText);
+    const toSpeak = explanationVisible && explanation ? explanation : correct;
+    if (!toSpeak) return;
+  
+    const utterance = new SpeechSynthesisUtterance(toSpeak);
     utterance.lang = "en-US";
     setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     window.speechSynthesis.speak(utterance);
   };
-
+  
   return (
     <div style={{
       padding: "1.25rem",
@@ -120,7 +162,7 @@ function App() {
       fontSize: "1.125rem", // 18px
       position: "relative" // so that select can be positioned
     }}>
-      {/* Select mode — location rigth upper coner*/}
+      {/* Select mode — top right */}
       <div style={{ position: "absolute", top: 20, right: 20 }}>
         <select value={mode} onChange={(e) => setMode(e.target.value)}>
           <option value="translate">Translate RU → EN</option>
@@ -128,9 +170,11 @@ function App() {
           <option value="teacher-en-ru" disabled>AI teacher — EN + RU</option>
         </select>
       </div>
+
       <strong style={{ display: "block", marginTop: "1rem", marginBottom: "1rem" }}>
         Text to translate / Talk to AI
       </strong>
+
       <textarea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
@@ -138,18 +182,28 @@ function App() {
         style={{ width: "100%", marginBottom: "0.625rem", fontSize: "1.125rem" }}
         placeholder="Type your phrase or tap the microphone 🎙️"
       />
+
       <div style={{ marginBottom: 10 }}>
         <button onClick={handleVoiceInput}>🎙️ Record</button>
         <button onClick={handleStopRecording} style={{ marginLeft: 10 }}>⏹️ Stop</button>
         <button onClick={handleSubmit} style={{ marginLeft: 10 }}>Send</button>
       </div>
-      {outputText && (
-        <div style={{ marginTop: 20 }}>
-          <strong>Answer:</strong>
-          <p>{outputText}</p>
-          <button onClick={handleSpeak} disabled={isSpeaking}>🔊 Listen</button>
-        </div>
-      )}
+
+      {outputText && (() => {
+        const { mistake, correct, explanation } = parseOutput(outputText);
+        return (
+          <div style={{ marginTop: 20 }}>
+            <strong>Answer:</strong>
+            <p>{mistake}</p>
+            <p>{correct}</p>
+            {!explanationVisible && explanation && (
+              <button onClick={() => setExplanationVisible(true)}>🧠 Explanation</button>
+            )}
+            {explanationVisible && explanation && <p>{explanation}</p>}
+            <button onClick={handleSpeak} style={{ marginLeft: 10 }} disabled={isSpeaking}>🔊 Listen</button>
+          </div>
+        );
+      })()}
     </div>
   );
 }
