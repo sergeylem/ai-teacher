@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import type { Express } from 'express'; 
 import * as fs from 'fs';
 import * as path from 'path';
+import { PROMPTS } from '../constants'; 
 
 dotenv.config();
 
@@ -12,13 +13,7 @@ export class OpenaiService {
   private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   async askOpenAI(question: string, mode: string): Promise<string> {
-    // TODO move to constants
-    const prompts: Record<string, string> = {
-      translate: 'You are a translator. Translate only from Russian to English. Do not provide explanations or examples. Only return the translation.',
-      'teacher-en': 'You are an English teacher. Answer shortly and clearly in English. Speak as if talking to a student. Do not explain too much.',
-    };
-
-    const systemPrompt = prompts[mode] || 'You are an English assistant.';
+    const systemPrompt = PROMPTS[mode] || 'You are an English assistant.';
 
     const response = await this.openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
