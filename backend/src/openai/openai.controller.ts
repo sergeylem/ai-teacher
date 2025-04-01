@@ -25,8 +25,11 @@ export class OpenaiController {
       },
     }),
   }))
-  async transcribe(@UploadedFile() file: Express.Multer.File) {
-    const transcript = await this.openaiService.transcribeAudio(file);
+  async transcribe(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('mode') mode: string,
+  ) {
+    const transcript = await this.openaiService.transcribeAudio(file, mode);
     return { transcript };
   }
 }

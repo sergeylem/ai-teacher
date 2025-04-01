@@ -31,13 +31,16 @@ export class OpenaiService {
     return response.choices[0].message?.content || '';
   }
 
-  async transcribeAudio(file: Express.Multer.File): Promise<string> {
+  async transcribeAudio(file: Express.Multer.File, mode: string): Promise<string> {
     const filePath = path.resolve(file.path); // path to the saved file
-  
+    const language = mode === 'teacher-en' ? 'en' : 'ru';
+    
     const response = await this.openai.audio.transcriptions.create({
       file: fs.createReadStream(filePath),
       model: 'whisper-1',
       response_format: 'text',
+      language,
+      temperature: 0, // To check
     });
   
     // Clean file after using

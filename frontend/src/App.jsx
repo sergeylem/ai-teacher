@@ -13,6 +13,36 @@ function App() {
     const mediaRecorder = new MediaRecorder(stream);
     audioChunksRef.current = [];
 
+    const audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    source.connect(analyser);
+    analyser.fftSize = 2048;
+    const bufferLength = analyser.fftSize;
+    const dataArray = new Uint8Array(bufferLength);
+
+    let silenceStart = null;
+    const maxSilence = 6000; // 6 seconds
+
+    const detectSilence = () => {
+      analyser.getByteTimeDomainData(dataArray);
+      const average = dataArray.reduce((sum, val) => sum + Math.abs(val - 128), 0) / bufferLength;
+
+      if (average < 2) { // 🧘 very quiet
+        if (!silenceStart) silenceStart = Date.now();
+        else if (Date.now() - silenceStart > maxSilence) {
+          console.log("🛑 Silence detected. Stopping...");
+          stopRecording(); // ⏹️ We stop in silence
+        }
+      } else {
+        silenceStart = null; // the sound is back
+      }
+
+      if (mediaRecorder.state === "recording") {
+        requestAnimationFrame(detectSilence);
+      }
+    };
+
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         audioChunksRef.current.push(e.data);
@@ -38,13 +68,17 @@ function App() {
       }
     };
 
+    const stopRecording = () => {
+      if (mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        stream.getTracks().forEach((track) => track.stop());
+        audioContext.close();
+      }
+    };
+  
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.start();
-
-    // Auto stop recording in 6 sec
-    setTimeout(() => {
-      mediaRecorder.stop();
-    }, 6000);
+    requestAnimationFrame(detectSilence); // 🧠 start silence monitoring
   };
 
   const handleStopRecording = () => {
@@ -86,7 +120,7 @@ function App() {
       fontSize: "1.125rem", // 18px
       position: "relative" // so that select can be positioned
     }}>
-    {/* Select mode — location rigth upper coner*/}
+      {/* Select mode — location rigth upper coner*/}
       <div style={{ position: "absolute", top: 20, right: 20 }}>
         <select value={mode} onChange={(e) => setMode(e.target.value)}>
           <option value="translate">Translate RU → EN</option>
