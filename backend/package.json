@@ -14,7 +14,7 @@
     "@nestjs/platform-express": "^10.4.15",
     "dotenv": "^16.0.0",
     "multer": "^1.4.5-lts.2",
-    "openai": "^4.0.0",
+    "openai": "^4.91.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.0.0"
   },

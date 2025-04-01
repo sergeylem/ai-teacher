@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import OpenAI from 'openai';
-import * as dotenv from 'dotenv';
-import type { Express } from 'express'; 
+import * as stream from 'stream/promises';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
+import { Injectable } from '@nestjs/common';
+import OpenAI from 'openai';
+import type { Express } from 'express'; 
 import { PROMPTS } from '../constants'; 
 
 dotenv.config();
@@ -24,6 +25,17 @@ export class OpenaiService {
     });
 
     return response.choices[0].message?.content || '';
+  }
+
+  async speakText(text: string): Promise<Buffer> {
+    const speech = await this.openai.audio.speech.create({
+      model: 'tts-1',
+      voice: 'shimmer', // variants: alloy, echo, fable, onyx, nova, shimmer
+      input: text,
+    });
+  
+    const buffer = Buffer.from(await speech.arrayBuffer());
+    return buffer;
   }
 
   async transcribeAudio(file: Express.Multer.File, mode: string): Promise<string> {

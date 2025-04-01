@@ -8,7 +8,5 @@ export const PROMPTS: Record<string, string> = {
     If the sentence is already correct, say exactly:  
     ✅ Correct: <sentence>.  
 
-    ⚠️ Do not skip any line. Do not reorder. Do not provide only explanation without the corrected sentence.`,
-
-    
+    ⚠️ Do not skip any line. Do not reorder. Do not provide only explanation without the corrected sentence.`,    
   };

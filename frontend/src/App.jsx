@@ -140,19 +140,28 @@ function App() {
     }
   };
 
-  const handleSpeak = () => {
+  const handleSpeak = async () => {
     if (!outputText) return;
     const { correct, explanation } = parseOutput(outputText);
     const toSpeak = explanationVisible && explanation ? explanation : correct;
     if (!toSpeak) return;
   
-    const utterance = new SpeechSynthesisUtterance(toSpeak);
-    utterance.lang = "en-US";
-    setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
-  };
+    try {
+      const res = await fetch("http://localhost:3001/api/speak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: toSpeak }),
+      });
   
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+    } catch (err) {
+      console.error("Speech error", err);
+    }
+  };
+    
   return (
     <div style={{
       padding: "1.25rem",
