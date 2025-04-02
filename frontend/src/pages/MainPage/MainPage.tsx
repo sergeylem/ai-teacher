@@ -14,7 +14,7 @@ export const MainPage: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [mode, setMode] = useState<AppMode>('teacher-en');
+  const [mode, setMode] = useState<AppMode>('speech-correction');
   const [explanationVisible, setExplanationVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -106,7 +106,7 @@ export const MainPage: React.FC = () => {
       <TextArea
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
-        placeholder="Type your phrase or tap the microphone 🎙️"
+        placeholder="Tap the microphone or Type your phrase 🎙️"
         disabled={isRecording}
         rows={4}
       />

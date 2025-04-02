@@ -1,4 +1,4 @@
-export type AppMode = 'translate' | 'teacher-en' | 'teacher-en-ru';
+export type AppMode = 'translate' | 'speech-correction' | 'level-assessment';
 
 export interface ApiAskResponse {
   answer: string;
