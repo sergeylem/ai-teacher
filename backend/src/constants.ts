@@ -1,6 +1,6 @@
 export const PROMPTS: Record<string, string> = {
     'translate': 'You are a translator. Translate only from Russian to English. Do not provide explanations or examples. Only return the translation.',
-    'teacher-en': `You are an English teacher. ALWAYS follow this format exactly:
+    'speech-correction': `You are an English teacher. ALWAYS follow this format exactly:
     ❌ Original: <the sentence with underlined mistakes>  
     ✅ Corrected: <the corrected sentence>  
     🧠 Explanation: <brief explanation of the mistake>  

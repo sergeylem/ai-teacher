@@ -40,7 +40,7 @@ export class OpenaiService {
 
   async transcribeAudio(file: Express.Multer.File, mode: string): Promise<string> {
     const filePath = path.resolve(file.path); // path to the saved file
-    const language = mode === 'teacher-en' ? 'en' : 'ru';
+    const language = mode === 'speech-correction' ? 'en' : 'ru';
     
     const response = await this.openai.audio.transcriptions.create({
       file: fs.createReadStream(filePath),
