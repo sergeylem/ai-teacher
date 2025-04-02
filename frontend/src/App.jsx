@@ -11,22 +11,26 @@ function App() {
 
   const parseOutput = (text) => {
     const lines = text.split("\n").map(line => line.trim()).filter(Boolean);
-  
+
+    if (mode === 'translate') {
+      return { mistake: "", correct: text, explanation: null };
+    }
+
     const mistake = lines.find(line => line.startsWith("❌")) || "";
     const correct = lines.find(line => line.startsWith("✅")) || "";
     const explanationRaw = lines.find(line => line.startsWith("🧠")) || "";
-  
+
     const lower = explanationRaw.toLowerCase();
     const explanation =
       !explanationRaw ||
-      lower.includes("no mistake") ||
-      lower.startsWith("✅ correct")
+        lower.includes("no mistake") ||
+        lower.startsWith("✅ correct")
         ? null
         : explanationRaw;
-  
+
     return { mistake, correct, explanation };
   };
-  
+
   const handleVoiceInput = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
@@ -77,7 +81,7 @@ function App() {
         setOutputText("Error request to AI");
       }
     };
-    
+
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         audioChunksRef.current.push(e.data);
@@ -142,17 +146,25 @@ function App() {
 
   const handleSpeak = async () => {
     if (!outputText) return;
-    const { correct, explanation } = parseOutput(outputText);
-    const toSpeak = explanationVisible && explanation ? explanation : correct;
+
+    let toSpeak = "";
+
+    if (mode === "translate") {
+      toSpeak = outputText;
+    } else {
+      const { correct, explanation } = parseOutput(outputText);
+      toSpeak = explanationVisible && explanation ? explanation : correct;
+    }
+
     if (!toSpeak) return;
-  
+
     try {
       const res = await fetch("http://localhost:3001/api/speak", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: toSpeak }),
       });
-  
+
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
@@ -161,7 +173,7 @@ function App() {
       console.error("Speech error", err);
     }
   };
-    
+
   return (
     <div style={{
       padding: "1.25rem",
@@ -173,7 +185,15 @@ function App() {
     }}>
       {/* Select mode — top right */}
       <div style={{ position: "absolute", top: 20, right: 20 }}>
-        <select value={mode} onChange={(e) => setMode(e.target.value)}>
+        <select
+          value={mode}
+          onChange={(e) => {
+            setMode(e.target.value);
+            setInputText("");
+            setOutputText("");
+            setExplanationVisible(false);
+          }}
+        >
           <option value="translate">Translate RU → EN</option>
           <option value="teacher-en">AI teacher — only English</option>
           <option value="teacher-en-ru" disabled>AI teacher — EN + RU</option>
@@ -203,12 +223,12 @@ function App() {
         return (
           <div style={{ marginTop: 20 }}>
             <strong>Answer:</strong>
-            <p>{mistake}</p>
+            {mistake && <p>{mistake}</p>}
             <p>{correct}</p>
-            {!explanationVisible && explanation && (
+            {mode !== 'translate' && !explanationVisible && explanation && (
               <button onClick={() => setExplanationVisible(true)}>🧠 Explanation</button>
             )}
-            {explanationVisible && explanation && <p>{explanation}</p>}
+            {mode !== 'translate' && explanationVisible && explanation && <p>{explanation}</p>}
             <button onClick={handleSpeak} style={{ marginLeft: 10 }} disabled={isSpeaking}>🔊 Listen</button>
           </div>
         );
