@@ -101,7 +101,7 @@ export const MainPage: React.FC = () => {
     <div className={styles.container}>
       <ModeSelector mode={mode} onChange={handleModeChange} />
 
-      <h1 className={styles.title}>Text to translate / Talk to AI</h1>
+      <h1 className={styles.title}>Talk to AI or Type Text </h1>
 
       <TextArea
         value={inputText}
