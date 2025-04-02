@@ -1,0 +1,47 @@
+.container {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+  }
+  
+  .mistake {
+    color: #e74c3c;
+    margin: 0.5rem 0;
+  }
+  
+  .correct {
+    color: #2ecc71;
+    margin: 0.5rem 0;
+  }
+  
+  .explanation {
+    color: #3498db;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: #ebf5fb;
+    border-radius: 4px;
+  }
+  
+  .explanationButton, .speakButton {
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .explanationButton:hover {
+    background-color: #eaf2f8;
+  }
+  
+  .speakButton:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .speakButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }

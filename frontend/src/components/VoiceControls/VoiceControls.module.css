@@ -1,0 +1,35 @@
+.controlsContainer {
+    display: flex;
+    gap: 0.625rem;
+    margin-bottom: 0.625rem;
+  }
+  
+  .controlButton {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .controlButton:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .controlButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .stopButton {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ef9a9a;
+  }
+  
+  .submitButton {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border-color: #90caf9;
+  }
