@@ -7,6 +7,15 @@ export const parseOutput = (text: string, mode: AppMode) => {
     return { mistake: "", correct: text, explanation: null };
   }
 
+  if (mode === 'level-assessment') {
+    const match = text.match(/(A1|A2|B1|B2|C1|C2)/i);
+    return {
+      mistake: '',
+      correct: `Your level is: ${match?.[0] || 'Unknown'}`,
+      explanation: text, // AI recomendation
+    };
+  }
+  
   const mistake = lines.find(line => line.startsWith("❌")) || "";
   const correct = lines.find(line => line.startsWith("✅")) || "";
   const explanationRaw = lines.find(line => line.startsWith("🧠")) || "";

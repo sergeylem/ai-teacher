@@ -1,4 +1,19 @@
-Structure of project
+Structure of backend
+
+src/
+├── openai/
+│   ├── openai.controller.ts
+│   ├── openai.service.ts
+├── conversation/
+│   └── conversation.entity.ts
+│   └── conversation.entity.ts
+├── app.module.ts
+├── constants.ts
+└── main.ts
+   └── types.ts
+
+
+Structure of frontend
 
 src/
 ├── api/
@@ -43,3 +58,5 @@ src/
 │   └── textUtils.ts
 ├── App.tsx
 └── index.tsx
+
+

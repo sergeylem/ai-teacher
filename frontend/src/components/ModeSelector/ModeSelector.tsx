@@ -17,7 +17,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onChange }) =>
       >
         <option value="translate">Translate RU → EN</option>
         <option value="speech-correction">Speech Correction — only English</option>
-        <option value="level-assessment" disabled>Level Assessment</option>
+        <option value="level-assessment">Level Assessment</option>
       </select>
     </div>
   );

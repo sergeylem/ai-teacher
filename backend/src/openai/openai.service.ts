@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv';
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import type { Express } from 'express'; 
-import { PROMPTS } from '../constants'; 
+import { getPrompt } from '../prompts'; 
 
 dotenv.config();
 
@@ -14,10 +14,10 @@ export class OpenaiService {
   private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   async askOpenAI(question: string, mode: string): Promise<string> {
-    const systemPrompt = PROMPTS[mode] || 'You are an English assistant.';
+    const systemPrompt = getPrompt(mode) || 'You are an English assistant.';
 
     const response = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-3.5-turbo', // 'gpt-4'
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: question },
@@ -57,4 +57,23 @@ export class OpenaiService {
   
     return response as string;
   }
+
+  async evaluateResponse(transcription: string) {
+    const prompt = getPrompt('user-assessment', { transcription });
+
+    const completion = await this.openai.chat.completions.create({
+      model: 'gpt-4', // или gpt-3.5-turbo
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+    });
+  
+    try {
+      const json = JSON.parse(completion.choices[0].message?.content || '{}');
+      return json;
+    } catch (err) {
+      console.error('Failed to parse OpenAI response:', err);
+      throw new Error('AI response parsing failed');
+    }
+  }
+  
 }
