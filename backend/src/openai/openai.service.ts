@@ -40,8 +40,8 @@ export class OpenaiService {
 
   async transcribeAudio(file: Express.Multer.File, mode: string): Promise<string> {
     const filePath = path.resolve(file.path); // path to the saved file
-    const language = mode === 'speech-correction' ? 'en' : 'ru';
-    
+    const language = mode === 'level-assessment' || mode === 'speech-correction' ? 'en' : 'ru';
+        
     const response = await this.openai.audio.transcriptions.create({
       file: fs.createReadStream(filePath),
       model: 'whisper-1',
@@ -69,6 +69,7 @@ export class OpenaiService {
   
     try {
       const json = JSON.parse(completion.choices[0].message?.content || '{}');
+      console.log(`evaluateResponse: ${completion}`);
       return json;
     } catch (err) {
       console.error('Failed to parse OpenAI response:', err);

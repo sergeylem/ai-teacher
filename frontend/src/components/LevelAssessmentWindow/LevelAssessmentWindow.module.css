@@ -1,0 +1,110 @@
+.window {
+    border: 2px solid #ccc;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    background-color: #f9f9f9;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .transcriptArea {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e0e0e0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .teacher {
+    color: #29066e;
+    background-color: #eef2ff;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+    animation: fadeIn 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .teacherIntro {
+    animation-delay: 0.5s;
+    animation: fadeIn 0.6s ease forwards;
+    opacity: 0;
+  }
+    
+  .student {
+    color: #333;
+    background-color: #e0f7fa;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0;
+    animation: fadeIn 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .record {
+    background-color: #4caf50;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .stop {
+    background-color: #f44336;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .options {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .options button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 0.5rem;
+  }
+  
+  .result {
+    background-color: #fff8e1;
+    border: 1px solid #ffe082;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+  }
+  

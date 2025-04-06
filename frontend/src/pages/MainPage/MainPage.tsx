@@ -9,6 +9,7 @@ import { ModeSelector } from '../../components/ModeSelector/ModeSelector';
 import { VoiceControls } from '../../components/VoiceControls/VoiceControls';
 import { ResponseDisplay } from '../../components/ResponseDisplay/ResponseDisplay';
 import { TextArea } from '../../components/Common/TextArea/TextArea';
+import { LevelAssessmentWindow } from '../../components/LevelAssessmentWindow/LevelAssessmentWindow';
 
 export const MainPage: React.FC = () => {
   const [inputText, setInputText] = useState('');
@@ -101,37 +102,43 @@ export const MainPage: React.FC = () => {
     <div className={styles.container}>
       <ModeSelector mode={mode} onChange={handleModeChange} />
 
-      <h1 className={styles.title}>Talk to AI or Type Text </h1>
+      {mode === 'level-assessment' ? (
+        <LevelAssessmentWindow />
+      ) : (
+        <>
+          <h1 className={styles.title}>Talk to AI or Type Text</h1>
 
-      <TextArea
-        value={inputText}
-        onChange={(e) => setInputText(e.target.value)}
-        placeholder="Tap the microphone or Type your phrase 🎙️"
-        disabled={isRecording}
-        rows={4}
-      />
+          <TextArea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Tap the microphone or Type your phrase 🎙️"
+            disabled={isRecording}
+            rows={4}
+          />
 
-      <VoiceControls
-        onStartRecording={handleVoiceInput}
-        onStopRecording={stopRecording}
-        onSubmit={() => handleSubmit()}
-        isRecording={isRecording}
-        isProcessing={isProcessing}
-      />
+          <VoiceControls
+            onStartRecording={handleVoiceInput}
+            onStopRecording={stopRecording}
+            onSubmit={() => handleSubmit()}
+            isRecording={isRecording}
+            isProcessing={isProcessing}
+          />
 
-      {outputText && (
-        <ResponseDisplay
-          output={parsedOutput}
-          mode={mode}
-          explanationVisible={explanationVisible}
-          onShowExplanation={() => setExplanationVisible(true)}
-          onSpeak={handleSpeak}
-          isSpeaking={isSpeaking}
-        />
-      )}
+          {outputText && (
+            <ResponseDisplay
+              output={parsedOutput}
+              mode={mode}
+              explanationVisible={explanationVisible}
+              onShowExplanation={() => setExplanationVisible(true)}
+              onSpeak={handleSpeak}
+              isSpeaking={isSpeaking}
+            />
+          )}
 
-      {isProcessing && !isRecording && (
-        <div className={styles.loadingIndicator}>Processing...</div>
+          {isProcessing && !isRecording && (
+            <div className={styles.loadingIndicator}>Processing...</div>
+          )}
+        </>
       )}
     </div>
   );

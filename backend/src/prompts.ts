@@ -24,6 +24,28 @@ const promptMap: Record<string, (payload?: PromptPayload) => string> = {
   'user-assessment': (payload?: PromptPayload) => {
     const transcription = payload?.transcription ?? '';
     return `You are an English language evaluator.
+    Analyze the following student's response (transcribed from speech) and provide the following:
+
+    1. Grammar score from 1 to 5.
+       - 5 = No grammatical errors or only minor ones.
+       - 3 = Noticeable mistakes that affect clarity.
+       - 1 = Serious grammatical errors making it hard to understand.
+
+    2. Vocabulary score from 1 to 5.
+       - 5 = Rich vocabulary, includes B2-C1 words or idioms.
+       - 3 = Basic vocabulary, limited variety.
+       - 1 = Repetitive or incorrect words, very simple.
+
+    3. Complexity score from 1 to 5.
+       - 5 = Complex sentence structures, clauses, connectors (e.g., although, however).
+       - 3 = Simple sentences with some linking words.
+       - 1 = Only very short or fragmented sentences.
+
+    Then:
+    - Estimate the CEFR level of this response only (A1-C2).
+    - List any grammar mistakes you notice.
+    - Provide a short explanation of your rating.
+
     Analyze the following student's response and provide a JSON result with:
     {
       "grammarScore": number (1-5),
