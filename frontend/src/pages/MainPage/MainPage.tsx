@@ -80,7 +80,10 @@ export const MainPage: React.FC = () => {
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
 
-      audio.onended = () => setIsSpeaking(false);
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl); // ← clean cache
+        setIsSpeaking(false);
+      };
       audio.onerror = () => setIsSpeaking(false);
       await audio.play();
     } catch (error) {
@@ -103,7 +106,7 @@ export const MainPage: React.FC = () => {
       <ModeSelector mode={mode} onChange={handleModeChange} />
 
       {mode === 'level-assessment' ? (
-        <LevelAssessmentWindow />
+        <LevelAssessmentWindow key="level-assessment" />
       ) : (
         <>
           <h1 className={styles.title}>Talk to AI or Type Text</h1>

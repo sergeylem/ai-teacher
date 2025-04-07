@@ -29,8 +29,8 @@ export class OpenaiService {
 
   async speakText(text: string): Promise<Buffer> {
     const speech = await this.openai.audio.speech.create({
-      model: 'tts-1',
-      voice: 'shimmer', // variants: alloy, echo, fable, onyx, nova, shimmer
+      model: 'tts-1', // 'tts-1-hd'
+      voice: 'nova', // variants: alloy, echo, fable, onyx, nova, shimmer
       input: text,
     });
   

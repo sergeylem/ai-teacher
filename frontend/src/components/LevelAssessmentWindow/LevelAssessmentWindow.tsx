@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
-import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { speechApi } from '../../api/speechApi';
 import { teacherApi } from '../../api/teacherApi';
 import { assessmentApi } from '../../api/assessmentApi';
+import { useTeacherDialogue } from '../../hooks/useTeacherDialogue';
+import { AssessmentControls } from '../AssessmentControls/AssessmentControls';
 import styles from './LevelAssessmentWindow.module.css';
 
 interface Message {
@@ -17,14 +18,12 @@ export const LevelAssessmentWindow: React.FC = () => {
   const [questionCount, setQuestionCount] = useState(0);
   const [showOptions, setShowOptions] = useState(false);
   const [finalResult, setFinalResult] = useState<{ finalLevel: string; summary: string } | null>(null);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [initialPromptSent, setInitialPromptSent] = useState(false);
-  const [hasIntroMessage, setHasIntroMessage] = useState(false);
 
   const { isRecording, startRecording, stopRecording, getAudioBlob } = useAudioRecorder();
-  const { speak, isSpeaking } = useSpeechSynthesis();
+  const { teacherSay, sayWelcomeIfNeeded, isSpeaking } = useTeacherDialogue();
 
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     if (transcriptRef.current) {
@@ -34,13 +33,8 @@ export const LevelAssessmentWindow: React.FC = () => {
 
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const teacherSay = async (text: string, skipSpeak = false) => {
-    if (!hasIntroMessage) setHasIntroMessage(true);
+  const addTeacherMessage = (text: string) => {
     setMessages(prev => [...prev, { role: 'teacher', text }]);
-    if (!skipSpeak) {
-      await wait(500);
-      await speak(text);
-    }
   };
 
   const handleStudentReply = async (transcript: string) => {
@@ -57,8 +51,9 @@ export const LevelAssessmentWindow: React.FC = () => {
       setShowOptions(true);
     } else if (currentCount < 15) {
       const next = await teacherApi.askQuestion(transcript, 'level-assessment');
-      await wait(600);
-      teacherSay(next.answer);
+      // await wait(600); // Pause
+      addTeacherMessage(next.answer);
+      await teacherSay(next.answer);
     } else {
       await handleFinish();
     }
@@ -81,20 +76,23 @@ export const LevelAssessmentWindow: React.FC = () => {
   };
 
   const handleStart = async () => {
-    if (initialPromptSent || hasIntroMessage) return;
-    setInitialPromptSent(true);
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+    setMessages([]);
+    setShowOptions(false);
+    setFinalResult(null);
     const { assessmentId } = await assessmentApi.start('demo-user');
     setAssessmentId(assessmentId);
     setQuestionCount(1);
-    setHasStarted(true);
-    await teacherSay("Hi! How are you? Let's get to know each other. My name is Ellie. What's your name?", false);
+    await sayWelcomeIfNeeded((text) => addTeacherMessage(text));
   };
 
   const handleContinue = async () => {
     setShowOptions(false);
     const next = await teacherApi.askQuestion('continue', 'level-assessment');
-    await wait(600);
-    teacherSay(next.answer);
+    // await wait(600); // Pause
+    addTeacherMessage(next.answer);
+    await teacherSay(next.answer);
   };
 
   const handleFinish = async () => {
@@ -103,20 +101,13 @@ export const LevelAssessmentWindow: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!initialPromptSent && !hasIntroMessage) {
-      handleStart();
-    }
-  }, [initialPromptSent, hasIntroMessage]);
+    handleStart();
+  }, []);
 
   const renderMessage = (msg: Message, index: number) => {
     const isTeacher = msg.role === 'teacher';
     const label = isTeacher ? 'Ellie 🧑‍🏫' : 'You 🧑';
-    const isIntro = isTeacher && index === 0;
-    const className = isTeacher
-      ? isIntro
-        ? `${styles.teacher} ${styles.teacherIntro}`
-        : styles.teacher
-      : styles.student;
+    const className = isTeacher ? styles.teacher : styles.student;
     return (
       <p key={index} className={className}>
         <strong>{label}:</strong> {msg.text}
@@ -137,20 +128,15 @@ export const LevelAssessmentWindow: React.FC = () => {
       </div>
 
       {!finalResult && (
-        <div className={styles.controls}>
-          {!isRecording && !isSpeaking ? (
-            <button onClick={handleVoiceInput} className={styles.record}>🎙️ Record</button>
-          ) : (
-            <button onClick={stopRecording} className={styles.stop}>⏹️ Stop</button>
-          )}
-
-          {showOptions && (
-            <div className={styles.options}>
-              <button onClick={handleContinue}>Continue</button>
-              <button onClick={handleFinish}>Stop</button>
-            </div>
-          )}
-        </div>
+        <AssessmentControls
+          isRecording={isRecording}
+          isSpeaking={isSpeaking}
+          onStart={handleVoiceInput}
+          onStop={stopRecording}
+          showOptions={showOptions}
+          onContinue={handleContinue}
+          onFinish={handleFinish}
+        />
       )}
     </div>
   );
