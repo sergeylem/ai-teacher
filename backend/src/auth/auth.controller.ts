@@ -1,7 +1,8 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+// src/auth/auth.controller.ts
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -10,12 +11,17 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
-    // initiates the Google OAuth2 login flow
+    // Starts the OAuth2 login flow
   }
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req: Request) {
-    return this.authService.loginWithGoogle(req.user as any); // TODO type
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const { accessToken, user } = await this.authService.loginWithGoogle(req.user as any);
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const redirectUrl = `${frontendUrl}/auth/callback?token=${accessToken}&user=${encodeURIComponent(JSON.stringify(user))}`;
+
+    return res.redirect(redirectUrl);
   }
 }

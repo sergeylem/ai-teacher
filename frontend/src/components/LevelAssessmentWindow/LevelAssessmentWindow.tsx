@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { speechApi } from '../../api/speechApi';
 import { teacherApi } from '../../api/teacherApi';
@@ -31,18 +31,20 @@ export const LevelAssessmentWindow: React.FC = () => {
     }
   }, [messages, finalResult]);
 
-  const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
   const addTeacherMessage = (text: string) => {
-    setMessages(prev => [...prev, { role: 'teacher', text }]);
+    setMessages((prev) => [...prev, { role: 'teacher', text }]);
   };
 
   const handleStudentReply = async (transcript: string) => {
-    const question = messages.filter(msg => msg.role === 'teacher').slice(-1)[0]?.text || '';
-    setMessages(prev => [...prev, { role: 'student', text: transcript }]);
+    const lastQuestion = messages.filter((msg) => msg.role === 'teacher').slice(-1)[0]?.text || '';
+    setMessages((prev) => [...prev, { role: 'student', text: transcript }]);
 
     if (!assessmentId) return;
-    await assessmentApi.addEntry({ assessmentId, question, transcription: transcript });
+    await assessmentApi.addEntry({
+      assessmentId,
+      question: lastQuestion,
+      transcription: transcript,
+    });
 
     const currentCount = questionCount + 1;
     setQuestionCount(currentCount);
@@ -51,7 +53,6 @@ export const LevelAssessmentWindow: React.FC = () => {
       setShowOptions(true);
     } else if (currentCount < 15) {
       const next = await teacherApi.askQuestion(transcript, 'level-assessment');
-      // await wait(600); // Pause
       addTeacherMessage(next.answer);
       await teacherSay(next.answer);
     } else {
@@ -67,30 +68,32 @@ export const LevelAssessmentWindow: React.FC = () => {
     mediaRecorder.onstop = async () => {
       const audioBlob = getAudioBlob();
       if (!audioBlob) return;
+
       const formData = new FormData();
       formData.append('file', audioBlob, 'audio.webm');
       formData.append('mode', 'level-assessment');
+
       const { transcript } = await speechApi.recognizeSpeech(formData);
       await handleStudentReply(transcript);
     };
   };
 
-  const handleStart = async () => {
+  const handleStart = useCallback(async () => {
     if (hasStartedRef.current) return;
     hasStartedRef.current = true;
     setMessages([]);
     setShowOptions(false);
     setFinalResult(null);
-    const { assessmentId } = await assessmentApi.start('demo-user');
+
+    const { assessmentId } = await assessmentApi.start(); // Без userId
     setAssessmentId(assessmentId);
     setQuestionCount(1);
     await sayWelcomeIfNeeded((text) => addTeacherMessage(text));
-  };
+  }, [sayWelcomeIfNeeded]);
 
   const handleContinue = async () => {
     setShowOptions(false);
     const next = await teacherApi.askQuestion('continue', 'level-assessment');
-    // await wait(600); // Pause
     addTeacherMessage(next.answer);
     await teacherSay(next.answer);
   };
@@ -102,7 +105,7 @@ export const LevelAssessmentWindow: React.FC = () => {
 
   useEffect(() => {
     handleStart();
-  }, []);
+  }, [handleStart]);
 
   const renderMessage = (msg: Message, index: number) => {
     const isTeacher = msg.role === 'teacher';

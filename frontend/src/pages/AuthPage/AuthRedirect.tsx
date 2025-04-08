@@ -1,4 +1,4 @@
-// pages/AuthRedirect.tsx
+// src/pages/AuthPage/AuthRedirect.tsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ export const AuthRedirect: React.FC = () => {
       navigate('/');
     } else {
       console.error('No token or user found in redirect');
-      navigate('/login');
+      navigate('/');
     }
   }, [navigate]);
 
