@@ -2,9 +2,9 @@ services:
   - type: web
     name: ai-teacher-backend
     env: node
-    buildCommand: npm run build
-    startCommand: npm run start:prod
     rootDir: backend
+    buildCommand: bash -c "npm install && npm run build"
+    startCommand: npm run start:prod
     envVars:
       - key: NODE_VERSION
         value: 20
