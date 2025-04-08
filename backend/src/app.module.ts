@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OpenaiController } from './openai/openai.controller';
-import { OpenaiService } from './openai/openai.service';
+import { AuthModule } from './auth/auth.module';
+import { AssessmentModule } from './assessment/assessment.module';
+import { User } from './assessment/entities/user.entity';
 import { UserAssessment } from './assessment/entities/user-assessment.entity';
 import { AssessmentEntry } from './assessment/entities/assessment-entry.entity';
-import { AssessmentModule } from './assessment/assessment.module';
 
 @Module({
   imports: [
@@ -15,14 +15,11 @@ import { AssessmentModule } from './assessment/assessment.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [UserAssessment, AssessmentEntry],
-      synchronize: true, // In prod is false
+      entities: [User, UserAssessment, AssessmentEntry],
+      synchronize: true,
     }),
-    TypeOrmModule.forFeature([UserAssessment, AssessmentEntry]),
+    AuthModule,
     AssessmentModule,
-  ], 
-  controllers: [OpenaiController],
-  providers: [OpenaiService],
+  ],
 })
-
-export class AppModule { }
+export class AppModule {}

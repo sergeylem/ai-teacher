@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppMode } from '@/models/types';
 import styles from './MainPage.module.css';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
@@ -10,6 +10,7 @@ import { VoiceControls } from '../../components/VoiceControls/VoiceControls';
 import { ResponseDisplay } from '../../components/ResponseDisplay/ResponseDisplay';
 import { TextArea } from '../../components/Common/TextArea/TextArea';
 import { LevelAssessmentWindow } from '../../components/LevelAssessmentWindow/LevelAssessmentWindow';
+import { LoginButton } from '../../components/Auth/LoginButton';
 
 export const MainPage: React.FC = () => {
   const [inputText, setInputText] = useState('');
@@ -18,8 +19,14 @@ export const MainPage: React.FC = () => {
   const [mode, setMode] = useState<AppMode>('speech-correction');
   const [explanationVisible, setExplanationVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const { isRecording, startRecording, stopRecording, getAudioBlob } = useAudioRecorder();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   const handleVoiceInput = async () => {
     try {
@@ -81,7 +88,7 @@ export const MainPage: React.FC = () => {
       const audio = new Audio(audioUrl);
 
       audio.onended = () => {
-        URL.revokeObjectURL(audioUrl); // ← clean cache
+        URL.revokeObjectURL(audioUrl);
         setIsSpeaking(false);
       };
       audio.onerror = () => setIsSpeaking(false);
@@ -100,6 +107,19 @@ export const MainPage: React.FC = () => {
   };
 
   const parsedOutput = parseOutput(outputText, mode);
+
+  const user = localStorage.getItem('user');
+
+  if (!user) {
+  // if (!isAuthenticated) {
+    return (
+      <div className={styles.container}>
+        <h1>Welcome</h1>
+        <p>Please log in to continue.</p>
+        <LoginButton />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
