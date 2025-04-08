@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ai-teacher-backend
+    env: node
+    buildCommand: npm run build
+    startCommand: npm run start:prod
+    rootDir: backend
+    envVars:
+      - key: NODE_VERSION
+        value: 20
