@@ -5,6 +5,7 @@ import { AssessmentModule } from './assessment/assessment.module';
 import { User } from './assessment/entities/user.entity';
 import { UserAssessment } from './assessment/entities/user-assessment.entity';
 import { AssessmentEntry } from './assessment/entities/assessment-entry.entity';
+import { OpenaiModule } from './openai/openai.module'; 
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AssessmentEntry } from './assessment/entities/assessment-entry.entity';
     }),
     AuthModule,
     AssessmentModule,
+    OpenaiModule,
   ],
 })
 export class AppModule {}

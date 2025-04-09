@@ -4,7 +4,7 @@ import { OpenaiService } from './openai.service';
 import { Express, Response } from 'express';
 import { diskStorage } from 'multer';
 
-@Controller('api')
+@Controller()
 export class OpenaiController {
   constructor(private readonly openaiService: OpenaiService) { }
 

@@ -1,7 +1,9 @@
+// src/api/apiClient.ts
 const API_BASE_URL = 'http://localhost:3001/api';
 
 export const apiClient = {
   async post<T>(endpoint: string, body: unknown): Promise<T> {
+    console.log(`endpoint ${endpoint}`);
     const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

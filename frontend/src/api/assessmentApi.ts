@@ -4,7 +4,7 @@ import { apiClient } from './apiClient';
 export const assessmentApi = {
   start: () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return apiClient.post<{ assessmentId: string }>('api/assessment/start', {
+    return apiClient.post<{ assessmentId: string }>('assessment/start', {
       userId: user?.id,
     });
   },
@@ -13,10 +13,10 @@ export const assessmentApi = {
     assessmentId: string;
     question: string;
     transcription: string;
-  }) => apiClient.post('api/assessment/entry', entry),
+  }) => apiClient.post('assessment/entry', entry),
 
   complete: (assessmentId: string) =>
-    apiClient.post<{ finalLevel: string; summary: string }>('api/assessment/complete', {
+    apiClient.post<{ finalLevel: string; summary: string }>('assessment/complete', {
       assessmentId,
     }),
 };
