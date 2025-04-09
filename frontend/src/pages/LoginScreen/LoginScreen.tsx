@@ -2,7 +2,7 @@
 import React from 'react';
 import styles from './LoginScreen.module.css';
 
-const GOOGLE_AUTH_URL = 'http://localhost:3001/api/auth/google'; // TODO: change to prod
+const GOOGLE_AUTH_URL = `http://${process.env.REACT_APP_API_URL}/api/auth/google`;
 
 export const LoginScreen: React.FC = () => {
   return (

@@ -1,5 +1,6 @@
 import { apiClient } from './apiClient';
 import { ApiWhisperResponse } from '../models/types';
+const API_BASE_URL = `http://${process.env.REACT_APP_API_URL}/api/speak`;
 
 export const speechApi = {
   async recognizeSpeech(formData: FormData): Promise<ApiWhisperResponse> {
@@ -7,7 +8,7 @@ export const speechApi = {
   },
 
   async synthesizeSpeech(text: string): Promise<Blob> {
-    const response = await fetch('http://localhost:3001/api/speak', {
+    const response = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
