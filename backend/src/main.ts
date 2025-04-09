@@ -19,17 +19,16 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const isDev = process.env.NODE_ENV !== 'production';
+  console.log(`isDev ${isDev}`);
 
   app.enableCors({
-    origin: (
-      isDev
-        ? ['http://localhost:3000']
-        : [process.env.CLIENT_URL]
-    ).filter(Boolean) as (string | RegExp)[],
-    credentials: true
+    origin: isDev
+      ? ['http://localhost:3000'] // local
+      : [process.env.CLIENT_URL || ''],   // prod
+    credentials: true,             // allow cookies
   });
-  
-  const port = process.env.PORT || 3000;
+
+  const port = process.env.PORT || 3001; // 3001 bаckend
   await app.listen(port);
   console.log(`🚀 Server running on port ${port}`);
   console.log(`✅ CORS enabled for: ${isDev ? 'localhost:3000' : process.env.CLIENT_URL}`);
