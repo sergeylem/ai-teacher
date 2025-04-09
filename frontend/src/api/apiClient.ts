@@ -1,5 +1,5 @@
 // src/api/apiClient.ts
-const API_BASE_URL = `http://${process.env.REACT_APP_API_URL}/api`;
+const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api`;
 
 export const apiClient = {
   async post<T>(endpoint: string, body: unknown): Promise<T> {

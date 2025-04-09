@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient';
 import { ApiWhisperResponse } from '../models/types';
-const API_BASE_URL = `http://${process.env.REACT_APP_API_URL}/api/speak`;
+const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api/speak`;
 
 export const speechApi = {
   async recognizeSpeech(formData: FormData): Promise<ApiWhisperResponse> {
