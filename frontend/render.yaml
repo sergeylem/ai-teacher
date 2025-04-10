@@ -2,7 +2,7 @@ services:
   - type: web
     name: ai-teacher-frontend
     env: node
-    rootDir: backend
+    rootDir: frontend
     buildCommand: bash -c "npm install && npm run build"
     startCommand: npm run start:prod
     envVars:
